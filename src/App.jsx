@@ -17,7 +17,9 @@ function App() {
       <Talents />
       <Awards />
       <Gallery />
-      <ContactForm />
+      <section id="contact">
+  <ContactForm />
+</section>
       <Footer />
       <WhatsAppChat/>
     </div>
