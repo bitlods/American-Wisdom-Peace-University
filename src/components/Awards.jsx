@@ -26,43 +26,46 @@ export default function Awards() {
     },
   ];
 
-  const sendEmail = (e) => {
-    e.preventDefault();
+  const sendEmail = async (e) => {
+  e.preventDefault();
 
-    emailjs
-      .sendForm(
+  try {
+    await emailjs.sendForm(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      e.target,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    );
+
+    const formData = new FormData(e.target);
+    const userEmail = formData.get("email");
+    const userName = formData.get("fullName");
+
+    try {
+      await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-        e.target,
+        import.meta.env.VITE_EMAILJS_REPLY_TEMPLATE,
+        {
+          to_email: userEmail,
+          fullName: userName,
+        },
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-      )
-      .then(() => {
-        // Send auto-reply to applicant
-        const formData = new FormData(e.target);
-        const userEmail = formData.get("email");
-        const userName = formData.get("fullName");
+      );
+    } catch (replyError) {
+      console.warn("Auto-reply failed:", replyError.text);
+      // Optional: show a different message or ignore
+    }
 
-        emailjs.send(
-          import.meta.env.VITE_EMAILJS_SERVICE_ID,
-          import.meta.VITE_EMAILJS_REPLY_TEMPLATE, // ✅ from .env
-          {
-            to_email: userEmail,
-            fullName: userName,
-          },
-          import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-        );
+    alert("Application submitted successfully!");
+    setShowForm(false);
+    setIsMinimized(false);
+  } catch (formError) {
+    alert("Failed to send. Please try again later.");
+    console.error("Form submission failed:", formError.text);
+  }
 
-        alert("Application submitted successfully!");
-        setShowForm(false);
-        setIsMinimized(false);
-      })
-      .catch((error) => {
-        alert("Failed to send. Please try again later.");
-        console.log(error.text);
-      });
-
-    e.target.reset();
-  };
+  e.target.reset();
+};
 
   return (
     <section
